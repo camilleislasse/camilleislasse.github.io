@@ -1,0 +1,52 @@
+---
+import { Image } from 'astro:assets';
+import type { BlogPost } from '../utils/blog';
+import { formatDate } from '../utils/date';
+import { readingTimeMinutes } from '../utils/reading-time';
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const minutes = readingTimeMinutes(post.body ?? '');
+---
+
+<article class="h-full">
+  <a
+    class="flex h-full flex-col border border-line transition-colors hover:border-ink"
+    href={`/blog/${post.id}/`}
+  >
+    {
+      post.data.cover ? (
+        <Image
+          class="aspect-video w-full object-cover"
+          src={post.data.cover}
+          alt={post.data.coverAlt ?? ''}
+          width={1200}
+        />
+      ) : (
+        <div class="flex aspect-video w-full items-center justify-center bg-cream-2">
+          <span class="size-14 border border-line-strong" aria-hidden="true"></span>
+        </div>
+      )
+    }
+    <div class="flex flex-1 flex-col p-6">
+      {
+        post.data.tags.length > 0 && (
+          <p class="mb-3 flex flex-wrap gap-2">
+            {post.data.tags.map((tag) => (
+              <span class="border border-line-strong px-2.5 py-1 text-xs font-medium">{tag}</span>
+            ))}
+          </p>
+        )
+      }
+      <h2 class="mb-2 text-xl">{post.data.title}</h2>
+      <p class="text-sm text-ink-2">{post.data.description}</p>
+      <p class="mt-auto pt-4 text-sm text-muted">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        {` · ${minutes} min`}
+      </p>
+    </div>
+  </a>
+</article>

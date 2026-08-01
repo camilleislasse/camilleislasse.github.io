@@ -1,0 +1,133 @@
+---
+import type { BlogPost } from '../utils/blog';
+import BlogCard from './BlogCard.astro';
+
+interface Props {
+  posts: BlogPost[];
+}
+
+const { posts } = Astro.props;
+---
+
+<div class="carousel" data-carousel>
+  <ul class="track no-scrollbar" data-carousel-track>
+    {
+      posts.map((post) => (
+        <li>
+          <BlogCard post={post} />
+        </li>
+      ))
+    }
+  </ul>
+  <button class="arrow arrow-prev" data-carousel-prev aria-label="Articles précédents">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15 6l-6 6 6 6"></path>
+    </svg>
+  </button>
+  <button class="arrow arrow-next" data-carousel-next aria-label="Articles suivants">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 6l6 6-6 6"></path>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .carousel {
+    position: relative;
+  }
+
+  .track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 88%;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .track li {
+    scroll-snap-align: start;
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 9999px;
+    background: var(--color-cream);
+    cursor: pointer;
+    transition:
+      background-color 150ms,
+      color 150ms,
+      opacity 150ms;
+  }
+
+  .arrow:hover:not(:disabled) {
+    background: var(--color-ink);
+    color: var(--color-cream);
+  }
+
+  .arrow:disabled {
+    opacity: 0;
+  }
+
+  .arrow svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .arrow-prev {
+    left: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  .arrow-next {
+    right: 0;
+    transform: translate(50%, -50%);
+  }
+
+  @media (min-width: 640px) {
+    .track {
+      grid-auto-columns: calc(50% - 0.5rem);
+    }
+
+    .arrow {
+      display: flex;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .track {
+      grid-auto-columns: calc(33.333% - 0.7rem);
+    }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-carousel]')) {
+    const track = root.querySelector<HTMLElement>('[data-carousel-track]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-carousel-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-carousel-next]');
+    if (!track || !prev || !next) continue;
+
+    const update = () => {
+      prev.disabled = track.scrollLeft <= 0;
+      next.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 1;
+    };
+    prev.addEventListener('click', () => track.scrollBy({ left: -track.clientWidth }));
+    next.addEventListener('click', () => track.scrollBy({ left: track.clientWidth }));
+    track.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+</script>

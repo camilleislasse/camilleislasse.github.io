@@ -1,0 +1,80 @@
+---
+import { Icon } from 'astro-icon/components';
+import GitGraph from '../components/GitGraph.astro';
+import PostCarousel from '../components/PostCarousel.astro';
+import Layout from '../layouts/Layout.astro';
+import { certifications, cvEntries, profile } from '../data/cv';
+import { getPublishedPosts } from '../utils/blog';
+
+const posts = await getPublishedPosts();
+---
+
+<Layout
+  title="Camille Islasse · Développeur Symfony & Sylius"
+  description="Camille Islasse, développeur Symfony & Sylius : e-commerce sur mesure, connecteurs ERP/CRM/PIM et contributions open source à Sylius et Symfony AI."
+>
+  <section class="pt-16 pb-16">
+    <h1 class="text-4xl md:text-5xl">{profile.role}</h1>
+    <p class="mt-5 max-w-xl text-lg text-ink-2">{profile.tagline}</p>
+    <p class="mt-3 max-w-xl text-sm text-muted">{profile.current}</p>
+    <ul class="mt-7 flex gap-5">
+      {
+        profile.links.map((link) => (
+          <li>
+            <a
+              class="block text-ink transition-opacity hover:opacity-60"
+              href={link.href}
+              aria-label={link.label}
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+              rel={link.href.startsWith('http') ? 'noopener' : undefined}
+            >
+              <Icon name={link.icon} size={24} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="border-t border-line py-12">
+    <h2 class="mb-6 text-center text-2xl sm:text-left">Derniers articles</h2>
+    <PostCarousel posts={posts} />
+    <div class="mt-8 text-center">
+      <a
+        class="inline-block rounded-full bg-ink px-7 py-3.5 font-display font-bold text-cream"
+        href="/blog/">Voir tous les articles</a
+      >
+    </div>
+  </section>
+
+  <section class="border-t border-line py-12">
+    <h2 class="sr-only">Parcours et open source</h2>
+    <GitGraph entries={cvEntries} />
+  </section>
+
+  <section class="border-t border-line py-12">
+    <h2 class="mb-6 text-2xl">Certifications</h2>
+    <ul class="flex flex-wrap gap-2.5">
+      {
+        certifications.map((certif) => (
+          <li>
+            {certif.href ? (
+              <a
+                class="inline-block rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-ink"
+                href={certif.href}
+                target="_blank"
+                rel="noopener"
+              >
+                <strong class="font-semibold">{certif.issuer}</strong> · {certif.title}
+              </a>
+            ) : (
+              <span class="inline-block rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-2">
+                <strong class="font-semibold">{certif.issuer}</strong> · {certif.title}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>

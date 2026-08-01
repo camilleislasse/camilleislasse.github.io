@@ -1,0 +1,47 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import BlogCard from '../../components/BlogCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import TagFilter from '../../components/TagFilter.astro';
+import Layout from '../../layouts/Layout.astro';
+import { site } from '../../data/site';
+import { getPublishedPosts, getTagCounts, type BlogPost } from '../../utils/blog';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPublishedPosts();
+  return paginate(posts, { pageSize: 8 });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: Page<BlogPost>;
+}
+
+const { page } = Astro.props;
+const tags = getTagCounts(await getPublishedPosts());
+
+const title =
+  page.currentPage > 1
+    ? `Blog · page ${page.currentPage} · Camille Islasse`
+    : 'Blog · Camille Islasse';
+---
+
+<Layout title={title} description={site.blogDescription}>
+  <h1 class="mb-6 text-4xl">Blog</h1>
+  <TagFilter tags={tags} total={page.total} />
+  <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+    {
+      page.data.map((post) => (
+        <li>
+          <BlogCard post={post} />
+        </li>
+      ))
+    }
+  </ul>
+  {
+    page.lastPage > 1 && (
+      <div class="mt-10">
+        <Pagination page={page} />
+      </div>
+    )
+  }
+</Layout>

@@ -1,0 +1,54 @@
+---
+import type { Page } from 'astro';
+
+interface Props {
+  page: Page<unknown>;
+}
+
+const { page } = Astro.props;
+
+const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/${n}/`);
+const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
+const numbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
+
+const btn = 'inline-flex size-10 items-center justify-center border font-mono text-sm';
+const idle = 'border-line hover:border-ink';
+const current = 'border-ink bg-ink text-cream';
+const disabled = 'border-line text-muted-2';
+---
+
+<nav class="flex flex-wrap gap-1" aria-label="Pagination">
+  {
+    page.url.prev ? (
+      <a class:list={[btn, idle]} href={withSlash(page.url.prev)} aria-label="Page précédente">
+        ←
+      </a>
+    ) : (
+      <span class:list={[btn, disabled]} aria-hidden="true">
+        ←
+      </span>
+    )
+  }
+  {
+    numbers.map((n) => (
+      <a
+        class:list={[btn, n === page.currentPage ? current : idle]}
+        href={pageUrl(n)}
+        aria-current={n === page.currentPage ? 'page' : undefined}
+      >
+        {n}
+      </a>
+    ))
+  }
+  {
+    page.url.next ? (
+      <a class:list={[btn, idle]} href={withSlash(page.url.next)} aria-label="Page suivante">
+        →
+      </a>
+    ) : (
+      <span class:list={[btn, disabled]} aria-hidden="true">
+        →
+      </span>
+    )
+  }
+</nav>

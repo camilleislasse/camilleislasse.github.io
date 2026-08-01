@@ -1,0 +1,28 @@
+---
+import type { TagCount } from '../utils/blog';
+
+interface Props {
+  tags: TagCount[];
+  total: number;
+  active?: string;
+}
+
+const { tags, total, active } = Astro.props;
+
+const pill = 'inline-flex items-center gap-1.5 border px-3 py-1.5 text-xs font-medium';
+const idle = 'border-line-strong hover:border-ink';
+const selected = 'border-ink bg-ink text-cream';
+---
+
+<nav class="flex flex-wrap gap-2" aria-label="Filtrer les articles par tag">
+  <a class:list={[pill, active ? idle : selected]} href="/blog/">
+    Tous <span class="font-mono opacity-60">{total}</span>
+  </a>
+  {
+    tags.map(({ tag, count }) => (
+      <a class:list={[pill, tag === active ? selected : idle]} href={`/blog/tag/${tag}/`}>
+        {tag} <span class="font-mono opacity-60">{count}</span>
+      </a>
+    ))
+  }
+</nav>

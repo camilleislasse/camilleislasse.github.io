@@ -1,0 +1,278 @@
+---
+import type { Branch, CvEntry } from '../data/cv';
+
+interface Props {
+  entries: CvEntry[];
+}
+
+const { entries } = Astro.props;
+
+interface Variant {
+  rowH: number;
+  railW: number;
+  laneX: Record<Branch, number>;
+  dotR: number;
+}
+
+const VARIANTS: Record<'desktop' | 'mobile', Variant> = {
+  desktop: { rowH: 110, railW: 150, laneX: { main: 40, sylius: 90, 'symfony-ai': 130 }, dotR: 7 },
+  mobile: { rowH: 190, railW: 84, laneX: { main: 18, sylius: 48, 'symfony-ai': 74 }, dotR: 6 },
+};
+
+interface GraphLine {
+  x: number;
+  y1: number;
+  y2: number;
+  dashed?: boolean;
+}
+
+interface GraphDot {
+  x: number;
+  y: number;
+  branch: Branch;
+}
+
+function buildGraph(v: Variant) {
+  const center = (row: number) => row * v.rowH + v.rowH / 2;
+  const scale = v.rowH / 110;
+  const rows = entries.map((entry, row) => ({ entry, row }));
+  const mainRows = rows.filter(({ entry }) => entry.branch === 'main');
+  const osBranches = [
+    ...new Set(rows.map(({ entry }) => entry.branch).filter((b) => b !== 'main')),
+  ];
+
+  const lines: GraphLine[] = [];
+  const forks: string[] = [];
+  const dots: GraphDot[] = [];
+
+  const mainX = v.laneX.main;
+  lines.push({ x: mainX, y1: center(mainRows[0].row), y2: center(mainRows.at(-1)!.row) });
+  for (const { row } of mainRows) {
+    dots.push({ x: mainX, y: center(row), branch: 'main' });
+  }
+
+  osBranches.forEach((branch, i) => {
+    const nodes = rows.filter(({ entry }) => entry.branch === branch);
+    const x = v.laneX[branch];
+    const firstY = center(nodes[0].row);
+    const lastY = center(nodes.at(-1)!.row);
+
+    const forkRow = mainRows.find(({ row }) => center(row) > lastY)!;
+    const attachY = center(forkRow.row) - v.rowH * (0.42 - i * 0.18);
+    const curveTopY = attachY - v.rowH * 0.55;
+
+    forks.push(
+      `M ${mainX} ${attachY} C ${mainX} ${attachY - 40 * scale}, ${x} ${attachY - 20 * scale}, ${x} ${curveTopY}`
+    );
+    lines.push({ x, y1: firstY, y2: curveTopY });
+    lines.push({ x, y1: v.rowH * 0.6, y2: firstY, dashed: true });
+    for (const { row } of nodes) dots.push({ x, y: center(row), branch });
+  });
+
+  return { height: entries.length * v.rowH, lines, forks, dots };
+}
+
+const graphs = (Object.entries(VARIANTS) as ['desktop' | 'mobile', Variant][]).map(
+  ([key, variant]) => ({ key, variant, graph: buildGraph(variant) })
+);
+---
+
+<div>
+  <div class="graph">
+    {
+      graphs.map(({ key, variant, graph }) => (
+        <svg
+          class={`rail rail-${key}`}
+          width={variant.railW}
+          height={graph.height}
+          viewBox={`0 0 ${variant.railW} ${graph.height}`}
+          fill="none"
+          aria-hidden="true"
+        >
+          {graph.lines.map((line) => (
+            <line
+              class:list={['stroke', { dashed: line.dashed }]}
+              x1={line.x}
+              y1={line.y1}
+              x2={line.x}
+              y2={line.y2}
+            />
+          ))}
+          {graph.forks.map((d) => <path class="stroke" d={d} />)}
+          {graph.dots.map((dot) => (
+            <circle
+              class={dot.branch === 'main' ? 'dot-main' : 'dot-oss'}
+              cx={dot.x}
+              cy={dot.y}
+              r={variant.dotR}
+            />
+          ))}
+        </svg>
+      ))
+    }
+
+    <ol class="entries">
+      {
+        entries.map((entry) => (
+          <li>
+            <span class="meta">{entry.meta}</span>
+            <div class="title-row">
+              <h3>
+                {
+                  entry.href ? (
+                    <a href={entry.href} target="_blank" rel="noopener">
+                      {entry.title}
+                    </a>
+                  ) : (
+                    entry.title
+                  )
+                }
+              </h3>
+              {entry.link && (
+                <a
+                  class="chip"
+                  href={entry.link.href}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`${entry.link.label} · ${entry.title}`}
+                >
+                  {entry.link.label}
+                </a>
+              )}
+            </div>
+            <p>{entry.description}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</div>
+
+<style>
+  .graph {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+  }
+
+  .rail-mobile {
+    display: none;
+  }
+
+  .stroke {
+    stroke: var(--color-ink);
+    stroke-width: 2.5;
+  }
+
+  .stroke.dashed {
+    stroke: var(--color-muted-2);
+    stroke-dasharray: 4 7;
+  }
+
+  .dot-main {
+    fill: var(--color-ink);
+  }
+
+  .dot-oss {
+    fill: var(--color-cream);
+    stroke: var(--color-ink);
+    stroke-width: 2.5;
+  }
+
+  .entries {
+    display: grid;
+    grid-auto-rows: 110px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .entries li {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 8px;
+  }
+
+  .meta {
+    font-size: 13px;
+    color: var(--color-muted);
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    margin: 3px 0 2px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 21px;
+  }
+
+  h3 a {
+    text-underline-offset: 4px;
+  }
+
+  h3 a:hover {
+    text-decoration: underline;
+  }
+
+  .entries p {
+    font-size: 14.5px;
+    color: var(--color-muted);
+  }
+
+  .chip {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 10px;
+    border: 1px solid var(--color-ink);
+    border-radius: 9999px;
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+
+  .chip:hover {
+    background: var(--color-ink);
+    color: var(--color-cream);
+  }
+
+  @media (max-width: 640px) {
+    .graph {
+      grid-template-columns: 84px 1fr;
+    }
+
+    .rail-desktop {
+      display: none;
+    }
+
+    .rail-mobile {
+      display: block;
+    }
+
+    .stroke {
+      stroke-width: 2;
+    }
+
+    .dot-oss {
+      stroke-width: 2;
+    }
+
+    .entries {
+      grid-auto-rows: 190px;
+    }
+
+    h3 {
+      font-size: 18px;
+    }
+
+    .entries p {
+      font-size: 13.5px;
+    }
+  }
+</style>

@@ -1,0 +1,93 @@
+---
+import { getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import type { BlogPosting, WithContext } from 'schema-dts';
+import Layout from '../../layouts/Layout.astro';
+import { getPublishedPosts } from '../../utils/blog';
+import { formatDate } from '../../utils/date';
+import { jsonld } from '../../utils/jsonld';
+import { readingTimeMinutes } from '../../utils/reading-time';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const minutes = readingTimeMinutes(post.body ?? '');
+
+const ogCover = post.data.cover
+  ? await getImage({ src: post.data.cover, width: 1200, format: 'png' })
+  : null;
+const ogImage = ogCover
+  ? {
+      url: new URL(ogCover.src, Astro.site).toString(),
+      width: Number(ogCover.attributes.width),
+      height: Number(ogCover.attributes.height),
+    }
+  : undefined;
+---
+
+<Layout
+  title={`${post.data.title} · Camille Islasse`}
+  description={post.data.description}
+  ogImage={ogImage}
+  article={{ publishedTime: post.data.pubDate, tags: post.data.tags }}
+>
+  <a class="mb-8 inline-block font-semibold underline-offset-4 hover:underline" href="/blog/">
+    ← Tous les articles
+  </a>
+
+  <article>
+    <header class="mb-10">
+      {
+        post.data.tags.length > 0 && (
+          <p class="mb-4 flex flex-wrap gap-2">
+            {post.data.tags.map((tag) => (
+              <a
+                class="border border-line-strong px-2.5 py-1 text-xs font-medium hover:border-ink"
+                href={`/blog/tag/${tag}/`}
+              >
+                {tag}
+              </a>
+            ))}
+          </p>
+        )
+      }
+      <h1 class="text-4xl">{post.data.title}</h1>
+      <p class="mt-3 font-mono text-xs text-muted">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        {` · ${minutes} min de lecture`}
+      </p>
+    </header>
+
+    <div
+      class="prose prose-headings:font-display prose-headings:font-black prose-headings:tracking-tight prose-a:underline-offset-4 prose-blockquote:border-l-ink prose-blockquote:font-display prose-blockquote:text-xl prose-blockquote:font-medium prose-blockquote:not-italic prose-pre:rounded-none"
+    >
+      <Content />
+    </div>
+  </article>
+
+  <a
+    class="mt-12 inline-block font-semibold underline-offset-4 hover:underline"
+    href="/blog/"
+  >
+    ← Tous les articles
+  </a>
+
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={jsonld({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.data.title,
+      description: post.data.description,
+      datePublished: post.data.pubDate.toISOString(),
+      ...(ogImage && { image: ogImage.url }),
+      author: { '@id': new URL('/#person', Astro.site).toString() },
+      mainEntityOfPage: new URL(`/blog/${post.id}/`, Astro.site).toString(),
+    } satisfies WithContext<BlogPosting>)}
+  />
+</Layout>

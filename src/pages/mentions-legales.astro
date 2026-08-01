@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site } from '../data/site';
+---
+
+<Layout
+  title="Mentions légales · Camille Islasse"
+  description="Mentions légales du site de Camille Islasse : éditeur, hébergement, contact."
+  noindex
+>
+  <h1 class="mb-10 text-4xl">Mentions légales</h1>
+
+  <div class="max-w-prose space-y-8 text-ink-2">
+    <section>
+      <h2 class="mb-2 text-xl text-ink">Éditeur du site</h2>
+      <p>
+        Ce site est édité à titre personnel et non professionnel par Camille Islasse.<br />
+        Contact : <a class="underline underline-offset-4" href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+      <p class="mt-2">Directeur de la publication : Camille Islasse.</p>
+    </section>
+
+    <section>
+      <h2 class="mb-2 text-xl text-ink">Hébergement</h2>
+      <p>
+        Le site est hébergé par GitHub Pages, un service de GitHub, Inc.<br />
+        88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis<br />
+        <a
+          class="underline underline-offset-4"
+          href="https://pages.github.com/"
+          target="_blank"
+          rel="noopener">pages.github.com</a
+        >
+      </p>
+    </section>
+
+    <section>
+      <h2 class="mb-2 text-xl text-ink">Données personnelles et cookies</h2>
+      <p>
+        Ce site utilise Google Analytics (GA4) pour mesurer son audience. Aucun cookie de mesure
+        n'est déposé sans votre consentement, recueilli lors de votre première visite. Votre choix
+        est conservé 6 mois et modifiable à tout moment via le lien « Cookies » en bas de page.
+      </p>
+      <p class="mt-2">
+        En dehors de la mesure d'audience, le site ne collecte aucune donnée personnelle et ne
+        comporte aucun formulaire.
+      </p>
+      <p class="mt-2">
+        L'hébergeur peut collecter des journaux techniques (adresses IP) nécessaires à la
+        fourniture du service, conformément à sa propre <a
+          class="underline underline-offset-4"
+          href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement"
+          target="_blank"
+          rel="noopener">politique de confidentialité</a
+        >.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="mb-2 text-xl text-ink">Propriété intellectuelle</h2>
+      <p>
+        Les contenus de ce site (textes, illustrations) sont la propriété de Camille Islasse, sauf
+        mention contraire. Les extraits de code présentés dans les articles sont librement
+        réutilisables.
+      </p>
+    </section>
+  </div>
+</Layout>
