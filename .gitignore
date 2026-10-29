@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # playwright mcp screenshots
 .playwright-mcp/
+
+# Copie du CV pour le serveur de dev (la source est générée dans dist/)
+public/cv-camille-islasse.pdf

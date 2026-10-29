@@ -1,0 +1,396 @@
+---
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import portrait from '../assets/camille.png';
+import { certifications, cvEntries, education, profile, skills } from '../data/cv';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+const jobs = cvEntries.filter((entry) => entry.branch === 'main' && !entry.excludeFromCv);
+const openSource = cvEntries.filter((entry) => entry.branch !== 'main' && !entry.excludeFromCv);
+const linkedin = profile.links.find((link) => link.label === 'LinkedIn')?.href ?? '';
+const keywords = ['PHP 8', 'E-commerce B2B/B2C', 'Marketplace'];
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>CV · Camille Islasse</title>
+    <link
+      rel="preload"
+      href="/fonts/quicksand-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <article class="cv">
+      <header>
+        <Image class="cv-photo" src={portrait} alt="" width={200} height={200} loading="eager" />
+        <div class="cv-head-text">
+        <h1>{profile.name}</h1>
+        <p class="cv-role">
+          {profile.role}
+          {keywords.map((word) => (
+            <span class="cv-kw"> | {word}</span>
+          ))}
+        </p>
+        <p class="cv-contact">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m2 7 10 6 10-6" />
+            </svg>
+            {site.email}
+          </span>
+          <span>
+            <Icon name="simple-icons:linkedin" />
+            {linkedin.replace('https://www.', '').replace(/\/$/, '')}
+          </span>
+          <span>
+            <Icon name="simple-icons:github" />
+            {site.github.replace('https://', '')}
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Le Puy-en-Velay
+          </span>
+        </p>
+        </div>
+      </header>
+
+      <section class="cv-section">
+        <h2 class="cv-h2">Expérience</h2>
+        {
+          jobs.map((job) => (
+            <div class="cv-item">
+              <h3>{job.title}</h3>
+              <p class="cv-meta">{job.meta}</p>
+              {job.projects ? (
+                job.projects.map((project) => (
+                  <div class="cv-project">
+                    <p class="cv-project-name">{project.name}</p>
+                    <ul class="cv-bullets">
+                      {project.highlights.map((item) => (
+                        <li class="cv-desc">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              ) : job.highlights ? (
+                <ul class="cv-bullets">
+                  {job.highlights.map((item) => (
+                    <li class="cv-desc">{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="cv-desc">{job.description}</p>
+              )}
+            </div>
+          ))
+        }
+      </section>
+
+      <section class="cv-section">
+        <h2 class="cv-h2">Compétences</h2>
+        {
+          skills.map((group) => (
+            <p class="cv-skill">
+              <strong>{group.label}</strong>{group.items.join(' · ')}
+            </p>
+          ))
+        }
+      </section>
+      <section class="cv-section">
+        <h2 class="cv-h2">Open source</h2>
+        {
+          openSource.map((entry) => (
+            <div class="cv-item">
+              <div class="cv-row">
+                <h3>{entry.title}</h3>
+              </div>
+              <p class="cv-desc">{entry.description}</p>
+            </div>
+          ))
+        }
+      </section>
+      <section class="cv-section">
+        <h2 class="cv-h2">Certifications</h2>
+        <div class="cv-certs">
+        {
+          certifications.map((certif) => (
+            <div class="cv-item">
+              <p class="cv-desc">
+                {certif.issuer} · {certif.title}
+              </p>
+            </div>
+          ))
+        }
+        </div>
+      </section>
+
+      <section class="cv-section">
+        <h2 class="cv-h2">Formation</h2>
+        {
+          education.map((diploma) => (
+            <div class="cv-item">
+              <h3>
+                {diploma.title}
+                {diploma.option && <span class="cv-option"> · {diploma.option}</span>}
+                <span class="cv-inline-date"> · {diploma.meta}</span>
+              </h3>
+            </div>
+          ))
+        }
+      </section>
+    </article>
+  </body>
+</html>
+
+<style is:global>
+  body {
+    background: var(--color-cream-3);
+    margin: 0;
+    padding: 2rem 1rem;
+  }
+
+  .cv {
+    --font-title: Arial, 'Liberation Sans', Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.38;
+    width: 210mm;
+    min-height: 297mm;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 15mm;
+    background: #fff;
+    box-shadow: 0 2px 16px rgb(0 0 0 / 0.12);
+  }
+
+  .cv header {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .cv-head-text {
+    min-width: 0;
+  }
+
+  .cv-photo {
+    width: 5.4em;
+    height: 5.4em;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  h1 {
+    font-family: var(--font-title);
+    font-size: 2.5em;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .cv-role {
+    font-family: var(--font-title);
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--color-ink-2);
+    margin: 0.25rem 0 0;
+  }
+
+  .cv-kw {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .cv-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em 1.1em;
+    font-size: 0.84em;
+    color: var(--color-ink-2);
+    margin: 0.4rem 0 0;
+  }
+
+  .cv-contact span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+  }
+
+  .cv-contact svg,
+  .cv-contact [data-icon] {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    color: var(--color-muted);
+  }
+
+  .cv-section {
+    margin-top: 0.95rem;
+  }
+
+  .cv-h2 {
+    font-family: var(--font-title);
+    font-size: 1.02em;
+    border-bottom: 1px solid var(--color-line);
+    padding-bottom: 0.2rem;
+    margin: 0 0 0.6rem;
+  }
+
+  .cv-item + .cv-item {
+    margin-top: 0.7rem;
+  }
+
+  .cv-skill {
+    font-size: 0.95em;
+    color: var(--color-ink-2);
+    margin: 0 0 0.25rem;
+  }
+
+  .cv-skill strong {
+    display: inline-block;
+    min-width: 11.5em;
+    padding-right: 0.9em;
+    font-family: var(--font-title);
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  .cv-certs {
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+
+  .cv-certs .cv-item + .cv-item {
+    margin-top: 0.35rem;
+  }
+
+  .cv-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 1rem;
+  }
+
+  .cv-row h3,
+  .cv-item > h3 {
+    font-family: var(--font-title);
+    font-size: 1em;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .cv-option {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--color-ink-2);
+  }
+
+  .cv-inline-date {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .cv-place {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .cv-date {
+    flex-shrink: 0;
+    font-size: 0.84em;
+    color: var(--color-muted);
+  }
+
+  .cv-desc {
+    font-size: 0.95em;
+    color: var(--color-ink-2);
+    margin: 0;
+  }
+
+  .cv-bullets {
+    margin: 0.2rem 0 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+  }
+
+  .cv-project {
+    margin-top: 0.7rem;
+  }
+
+  .cv-meta {
+    font-size: 0.84em;
+    color: var(--color-muted);
+    margin: 0.05rem 0 0.2rem;
+  }
+
+  .cv-project-name {
+    font-family: var(--font-title);
+    font-size: 0.88em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  .cv-bullets li {
+    padding-top: 0.1rem;
+  }
+
+  @media print {
+    body {
+      background: #fff;
+      padding: 0;
+    }
+
+    .cv {
+      width: auto;
+      min-height: 0;
+      padding: 0;
+      box-shadow: none;
+      font-size: 9pt;
+      line-height: 1.34;
+    }
+
+    .cv-section {
+      margin-top: 0.62rem;
+      break-inside: avoid;
+    }
+
+    .cv-item + .cv-item {
+      margin-top: 0.5rem;
+    }
+
+    .cv-project {
+      margin-top: 0.5rem;
+    }
+
+    .cv-item {
+      break-inside: avoid;
+    }
+
+    .cv-h2 {
+      break-after: avoid;
+    }
+
+    @page {
+      size: A4;
+      margin: 10mm 14mm;
+    }
+  }
+</style>

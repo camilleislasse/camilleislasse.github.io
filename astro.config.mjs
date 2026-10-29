@@ -25,7 +25,10 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/mentions-legales/') && !page.includes('/blog/tag/'),
+      filter: (page) =>
+        !page.includes('/mentions-legales/') &&
+        !page.includes('/blog/tag/') &&
+        !page.includes('/cv/'),
     }),
     icon(),
   ],
