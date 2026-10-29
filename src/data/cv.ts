@@ -77,7 +77,8 @@ export const cvEntries: CvEntry[] = [
       {
         name: "Plugins Sylius de l'agence",
         highlights: [
-          'Contribution aux plugins internes : droits (ACL), SEO, géolocalisation, historique de commandes.',
+          'Montées vers Sylius 1.14, Sylius 2 et Symfony 7 des plugins traductions, ACL, métriques Prometheus et scheduler.',
+          'Mise en place de la CI multi-versions Sylius/PHP du plugin de métriques, et plugin historique de commandes.',
         ],
       },
     ],
