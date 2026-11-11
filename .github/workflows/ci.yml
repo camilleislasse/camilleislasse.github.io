@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx astro check
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run build
+
+      - run: node scripts/check-cv-pages.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  lighthouse:
+    name: lighthouse (${{ matrix.device }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: mobile
+            args: ''
+          - device: desktop
+            args: --collect.settings.preset=desktop
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - run: npx -y @lhci/cli@0.16 autorun --config=./lighthouserc.cjs ${{ matrix.args }} --upload.target=temporary-public-storage
+
+      - if: always() && hashFiles('.lighthouseci/links.json') != ''
+        run: |
+          echo "### Lighthouse · ${{ matrix.device }}" >> "$GITHUB_STEP_SUMMARY"
+          jq -r 'to_entries[] | "- [\(.key | sub("^http://localhost:[0-9]+"; ""))](\(.value))"' \
+            .lighthouseci/links.json >> "$GITHUB_STEP_SUMMARY"
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-${{ matrix.device }}
+          path: .lighthouseci
