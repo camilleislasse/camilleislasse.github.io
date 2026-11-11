@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # Copie du CV pour le serveur de dev (la source est générée dans dist/)
 public/cv-camille-islasse.pdf
+
+# rapports Lighthouse CI locaux
+.lighthouseci/
