@@ -34,7 +34,7 @@ export const profile = {
   tagline:
     "Spécialisé dans l'e-commerce et les solutions métier : plateformes Sylius sur mesure, connecteurs ERP/CRM/PIM, reprises de projets et montées de version. Et pas mal d'open source",
   current:
-    "Actuellement développeur Symfony chez ACSEO",
+    'Actuellement développeur Symfony chez ACSEO · Sylius Key Contributor',
   links: [
     { label: 'GitHub', icon: 'simple-icons:github', href: 'https://github.com/camilleislasse' },
     {
@@ -46,6 +46,17 @@ export const profile = {
 } as const;
 
 export const cvEntries: CvEntry[] = [
+  {
+    branch: 'sylius',
+    meta: 'nov. 2026',
+    title: 'Sylius Key Contributor',
+    description:
+      "Statut accordé par l'équipe Sylius à ses contributeurs externes actifs, avec accès en écriture au code du projet.",
+    link: {
+      label: "c'est quoi ↗",
+      href: 'https://sylius.com/blog/news/introducing-the-sylius-key-contributors-program/',
+    },
+  },
   {
     branch: 'main',
     meta: "mars 2024 - aujourd'hui · Aix-en-Provence",
