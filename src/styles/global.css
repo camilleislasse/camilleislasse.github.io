@@ -31,10 +31,11 @@
   --color-cream-3: #dfd7c5;
   --color-ink: #0a0a0a;
   --color-ink-2: #1f1d1a;
-  --color-muted: #6b6760;
+  --color-muted: #66625b;
   --color-muted-2: #8c887f;
   --color-line: rgb(10 10 10 / 0.12);
   --color-line-strong: rgb(10 10 10 / 0.45);
+  --color-accent: #c2410c;
 
   --font-display: 'League Spartan', sans-serif;
   --font-body: 'Quicksand', sans-serif;
@@ -54,6 +55,7 @@
   }
 
   body {
+    overflow-x: clip;
     background: var(--color-cream);
     color: var(--color-ink);
     font-family: var(--font-body);
